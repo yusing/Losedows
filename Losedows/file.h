@@ -18,8 +18,8 @@
 #define IOS_OUT_BINARY (std::ios::out | std::ios::binary)
 #define IOS_OUT (std::ios::out)
 #include <fstream>
-bool open_file(const std::string& file_path, std::fstream& stream, std::ios_base::openmode mode);
+bool        open_file(const std::string& file_path, std::fstream& stream, std::ios_base::openmode mode);
 std::string current_path();
 std::string filename(const std::string& path);
 std::string file_extension(const std::string& path);
-bool file_exists(const std::string& file);
+bool        file_exists(const std::string& file);

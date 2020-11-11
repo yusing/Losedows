@@ -17,12 +17,16 @@
 #include <deque>
 #include <string>
 #include <Windows.h>
+
+/* process.cpp */
 void               start_process(LPCSTR command);
 void               kill_process(LPCSTR proc_name);
 bool               is_process_running(LPCSTR name);
 void               restart_explorer();
 std::vector<DWORD> get_pid_by_name(LPCSTR name);
+
+/* file dialog.cpp */
 /// \brief Open file dialog to choose multiple files
 /// \return list of selected files
 std::deque<std::string> open_file_dialog_multi();
-std::string        open_file_dialog();
+std::string             open_file_dialog();

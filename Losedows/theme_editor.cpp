@@ -66,11 +66,14 @@ void theme_editor()
 {
     if (ImGui::Begin("Theme editor"), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize){
         if (ImGui::Combo("Color Code", &current_item, color_codes, ImGuiCol_COUNT)){ }
-        ImGui::ColorEdit4(color_codes[current_item], (float*)&ImGui::GetStyle().Colors[current_item]);
-        if (ImGui::Button("Save theme")) {
+        if (ImGui::ColorEdit4(color_codes[current_item], (float*)&ImGui::GetStyle().Colors[current_item])){
+            
+        }
+        if (ImGui::Button("Save theme")){
             save_theme();
         }
-        if (ImGui::Button("Reload theme from file")) {
+        ImGui::SameLine();
+        if (ImGui::Button("Reload theme from file")){
             load_current_theme();
         }
         ImGui::End();

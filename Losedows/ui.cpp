@@ -29,9 +29,9 @@ extern std::vector<std::string>                             custom_tweaks;
 extern ImFont*                                              console_font;
 extern HWND                                                 hwnd;
 
-int  scroll_requests   = 0;
-bool show_logs         = false;
-bool show_theme_editor = false;
+int  scroll_requests       = 0;
+bool show_logs             = false;
+bool show_theme_editor     = false;
 bool show_advanced_options = false;
 RECT client_rect{0, 0, 0, 0};
 
@@ -72,27 +72,27 @@ void draw()
             ImGui::SameLine();
             ImGui::Checkbox("Show theme editor", &show_theme_editor);
             ImGui::SameLine();
-            if (ImGui::Button("Test tweak file(s)")) {
-                for (auto& file : open_file_dialog_multi()) {
+            if (ImGui::Button("Test tweak file(s)")){
+                for (auto& file : open_file_dialog_multi()){
                     custom_tweaks.push_back(file);
                     load_tweak_from_file(file);
                     add_custom_tweak(file);
                 }
             }
             ImGui::SameLine();
-            if (ImGui::Button("Pack tweaks")) {
-                pack_tweaks({ 0, 1 }, open_file_dialog_multi());
+            if (ImGui::Button("Pack tweaks")){
+                pack_tweaks({0, 1}, open_file_dialog_multi());
             }
             ImGui::SameLine();
-            if (ImGui::Button("Load tweak pack")) {
+            if (ImGui::Button("Load tweak pack")){
                 std::string file = open_file_dialog();
-                if (!file.empty()) {
+                if (!file.empty()){
                     load_tweak_pack(file);
                     add_custom_tweak(file);
                 }
             }
             ImGui::SameLine();
-            if (ImGui::Button("Clear tweaks")) {
+            if (ImGui::Button("Clear tweaks")){
                 clear_tweaks();
             }
         }
@@ -104,7 +104,8 @@ void draw()
                         LItem(item);
                     }
                     ImGui::EndTabItem();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1)); // reduce gpu usage for high refresh rate monitor
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    // reduce gpu usage for high refresh rate monitor
                 }
             }
             ImGui::EndTabBar();
@@ -117,17 +118,16 @@ void draw()
         }
         // get client window size
         GetWindowRect(hwnd, &client_rect);
-        // disallow the log windows to grow more than 80% of the client width and 60% of client height
+        // limit the log windows size to 80% of the client width and 60% of client height
         ImGui::SetNextWindowSizeConstraints({0, 0}, {client_rect.right * .8f, client_rect.bottom * .6f});
         if (ImGui::Begin("Logs", nullptr,
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysHorizontalScrollbar)){
             for (auto& line : get_logs()){
-                if (ImGui::Selectable(line.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick)){
-                    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)){
-                        // copy log content on double click
-                        ImGui::SetClipboardText(line.c_str());
-                        ++scroll_requests; // the last log is not displayed yet, so needed to scroll on next iteration
-                    }
+                ImGui::TextUnformatted(line.c_str());
+                if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                    // copy log content on double click
+                    ImGui::SetClipboardText(line.c_str());
+                    ++scroll_requests; // the last log is not displayed yet, so needed to scroll on next iteration
                 }
             }
             if (scroll_requests > 0){

@@ -13,32 +13,9 @@
 // limitations under the License.
 
 #pragma once
-#include "log.h"
-#include <curl/curl.h>
 
+#ifdef _UNICODE
+#error Please set character set to default ("Not set")
+#endif
 
-inline size_t curl_write_to_buf(void* content, size_t size, size_t nmemb, void* buf)
-{
-    auto new_size = size * nmemb;
-    memcpy(buf, static_cast<const char*>(content), new_size);
-    return new_size;
-}
-
-inline void check_update()
-{
-    CURL* curl;
-    curl = curl_easy_init();
-    char buf[4];
-    curl_easy_setopt(curl, CURLOPT_URL, "https://raw.githubusercontent.com/yusing/Losedows/main/tkpack_ver.txt");
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_to_buf);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, buf);
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
-    int result = curl_easy_perform(curl);
-    if(result == CURLE_OK){
-        log("curl success: result\n%s", buf);
-    }
-    else{
-        log("curl error %d", result);
-    }
-    curl_easy_cleanup(curl);
-}
+void check_update();

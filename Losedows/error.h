@@ -13,9 +13,17 @@
 // limitations under the License.
 
 #pragma once
-#include <deque>
 #include <string>
-void                    log_clear();
-int                     log(const char* fmt, ...);
-void                    log_append(const char* fmt, ...);
-std::deque<std::string> get_logs();
+/**
+ * \brief get string representation of GetLastError()
+ * \return error message
+ */
+std::string last_error_string();
+
+
+/**
+ * \brief get string representation of errno_t
+ * \param err error id
+ * \return error message of err
+ */
+std::string errno_string(errno_t err);

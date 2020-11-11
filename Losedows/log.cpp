@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissionsand
 // limitations under the License.
 
-#define LOG_BUF_SIZE 128
+#define LOG_BUF_SIZE 500
 #define LOG_MAX_LINES 1000
 #include <stdarg.h>
 #include <deque>
@@ -24,7 +24,8 @@
 std::deque<std::string> log_lines;
 extern int              scroll_requests;
 
-int log(const char* fmt, ...) {
+int log(const char* fmt, ...)
+{
     va_list vl;
     va_start(vl, fmt);
     char buf[LOG_BUF_SIZE];
@@ -37,7 +38,7 @@ int log(const char* fmt, ...) {
     /* write formatted log text to buf */
     vsnprintf(buf + len, LOG_BUF_SIZE - len, fmt, vl);
     va_end(vl);
-    if (log_lines.size() == LOG_MAX_LINES) {
+    if (log_lines.size() == LOG_MAX_LINES){
         log_lines.pop_front();
     }
     log_lines.push_back(buf);
@@ -54,7 +55,8 @@ void log_clear()
     log_lines.clear();
 }
 
-void log_append(const char* fmt, ...) {
+void log_append(const char* fmt, ...)
+{
     va_list vl;
     va_start(vl, fmt);
     char buf[LOG_BUF_SIZE];

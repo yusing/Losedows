@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissionsand
 // limitations under the License.
 
-#include <deque>
 #include "windows_impl.h"
-#include <imgui.h>
-#include <thread>
-
 #include "init_graphics.h"
+#include <imgui.h>
+#include <deque>
+#include <thread>
+#include <Windows.h>
+
 
 std::deque<std::string> open_file_dialog_multi()
 {
-    constexpr size_t   FILE_BUF_SIZE = 5*MAX_PATH;
+    constexpr size_t        FILE_BUF_SIZE = 5 * MAX_PATH;
     std::deque<std::string> files;
-    OPENFILENAMEA      ofn;
-    char*              buf = new char[FILE_BUF_SIZE]{'\0'};
+    OPENFILENAMEA           ofn;
+    char*                   buf = new char[FILE_BUF_SIZE]{'\0'};
     ZeroMemory(&ofn, sizeof ofn);
     ofn.lStructSize    = sizeof ofn;
     ofn.hwndOwner      = GetActiveWindow();
@@ -36,7 +37,7 @@ std::deque<std::string> open_file_dialog_multi()
     ofn.nMaxFileTitle  = 0;
     ofn.Flags          = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
     LPSTR p            = buf, p_file = buf;
-    
+
     if (!GetOpenFileNameA(&ofn)){
         return {};
     }
@@ -65,13 +66,13 @@ std::deque<std::string> open_file_dialog_multi()
 
 std::string open_file_dialog()
 {
-    OPENFILENAMEA    ofn;
-    char             buf[MAX_PATH]{'\0'};
+    OPENFILENAMEA ofn;
+    char          buf[MAX_PATH]{'\0'};
     ZeroMemory(&ofn, sizeof ofn);
     ofn.lStructSize    = sizeof ofn;
     ofn.hwndOwner      = GetActiveWindow();
     ofn.lpstrFile      = buf;
-    ofn.nMaxFile = MAX_PATH;
+    ofn.nMaxFile       = MAX_PATH;
     ofn.lpstrFilter    = "Tweak Pack\0*.TKPACK\0";
     ofn.nFilterIndex   = 0;
     ofn.lpstrFileTitle = nullptr;

@@ -15,6 +15,7 @@
 #include "windows_impl.h"
 #include "log.h"
 #include <string>
+#include <Windows.h>
 #include <tlhelp32.h>
 
 void start_process(LPCSTR command)
@@ -29,7 +30,7 @@ void start_process(LPCSTR command)
     if (CreateProcessA(command, nullptr, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)){
         CloseHandle(pi.hProcess);
         CloseHandle(pi.hThread);
-        log("started \"%s\" with PID %lu", command, pi.dwProcessId);
+        log("Process: started \"%s\" with PID %lu", command, pi.dwProcessId);
     }
 }
 
@@ -78,10 +79,10 @@ void kill_process(LPCSTR proc_name)
     for (auto& pid : get_pid_by_name(proc_name)){
         HANDLE handle = OpenProcess(PROCESS_TERMINATE, false, pid);
         if (TerminateProcess(handle, 0)){
-            log("terminated process explorer.exe with PID %lu successfully", pid);
+            log("Process: terminated process %s with PID %lu successfully", proc_name, pid);
         }
         else{
-            log("Error: failed to terminate process explorer.exe with PID %lu", pid);
+            log("Error: failed to terminate process %s with PID %lu", proc_name, pid);
         }
         CloseHandle(handle);
     }

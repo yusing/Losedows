@@ -33,7 +33,7 @@ static std::unordered_map<DWORD, LPCSTR> reg_type_name{
 #   define reg_exist_value(k,v,o) [&](LPCSTR __){ log("Debug: in %s: Check if value %s exists in \"%s\"", __, (v), (k)); return true; }(__FUNCTION__)
 #else
 /// \param out__type can be NULL
-/// HKEY hkey_from_bytes(int rtl_bytes);
+HKEY hkey_from_bytes(int rtl_bytes);
 bool reg_get_value(LPCSTR  fullkey, LPCSTR value_name, DATA data, DWORD dwFlags, LPDWORD out_type,
                    LPDWORD out_data_size);
 bool reg_set_value(LPCSTR fullkey, LPCSTR value_name, CDATA value, DWORD value_size, DWORD type);

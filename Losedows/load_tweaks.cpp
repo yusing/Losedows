@@ -20,10 +20,9 @@
 
 #include <cassert>
 #include <deque>
-#include <fstream>
-#include <thread>
-#include <unordered_map>
 #include <vector>
+#include <fstream>
+#include <unordered_map>
 #include <Windows.h>
 #include "file.h"
 #include "log.h"
@@ -41,12 +40,11 @@ static auto                                          EQUAL_TO     = [](DWORD x, 
 extern OSVERSIONINFOEX* get_os_info();
 
 
-
 void clear_tweaks()
 {
-    for (auto& _ : tweaks_read) {
+    for (auto& _ : tweaks_read){
         // free memory of old content
-        for (Tweak& entry : *_.second) {
+        for (Tweak& entry : *_.second){
             entry.dispose();
         }
         delete _.second;
@@ -56,28 +54,28 @@ void clear_tweaks()
 
 void add_custom_tweak(const std::string& file)
 {
-    custom_tweaks.push_back(file);   
+    custom_tweaks.push_back(file);
 }
 
 void load_all_tweaks()
 {
     clear_tweaks();
     const auto current_pack = current_path() + "\\current.tkpack";
-    const auto custom_pack = current_path() + "\\custom.tkpack";
+    const auto custom_pack  = current_path() + "\\custom.tkpack";
     if (file_exists(current_pack)){
         load_tweak_pack(current_pack);
     }
     else{
-        log("Warning: current.tkpack not found");
+        log("Tweak Warning: current.tkpack not found");
     }
-    if (file_exists(custom_pack)) {
+    if (file_exists(custom_pack)){
         load_tweak_pack(custom_pack);
     }
     for (auto& file : custom_tweaks){
         load_tweak_from_file(file);
     }
     if (tweaks_read.size() == 0){
-        log("No tweak loaded");
+        log("Tweak: No tweak loaded");
         return;
     }
     for (auto& _ : tweaks_read){
@@ -98,11 +96,12 @@ void load_tweak_from_file(const std::string& file)
     const std::string content((std::istreambuf_iterator<char>(fs)),
                               (std::istreambuf_iterator<char>()));
     const auto file_name = filename(file);
-    if (is_invalid(file_name.c_str(), content.c_str())){ // do not handle invalid tweak
-        log("Error found in \"%s\"", file_name.c_str());
+    if (is_invalid(file_name.c_str(), content.c_str())){
+        // do not handle invalid tweak
+        log("Tweak Error: Syntax error found in \"%s\"", file_name.c_str());
         return;
     }
-    log("file \"%s\" OK.", file_name.c_str());
+    log("Tweak: file \"%s\" OK.", file_name.c_str());
     load_tweak(content.c_str());
 }
 
@@ -117,49 +116,54 @@ void load_tweak_pack(const std::string& file)
     }
     const std::string content((std::istreambuf_iterator<char>(fs)),
                               (std::istreambuf_iterator<char>()));
-    const char* p = content.c_str(), *p_end = p+content.size();
+    const char *     p = content.c_str(), *p_end = p + content.size();
     TweakPackVersion version;
-    memcpy(&version, p, sizeof TweakPackVersion);
-    log("Tweak pack version %d.%d", version.major, version.minor);
-    p += sizeof TweakPackVersion;
-    do {
+    memcpy(&version, p, sizeof(TweakPackVersion));
+    log("Tweak: Tweak pack version %d.%d", version.major, version.minor);
+    p += sizeof(TweakPackVersion);
+    do{
         p = load_tweak(p) + 1; // skip '\0'
-    } while (p < p_end);
+    }
+    while (p < p_end);
 }
 
 template <class ContainerOfString>
-void pack_tweaks(const TweakPackVersion& version, ContainerOfString tweak_files)
+void pack_tweaks(TweakPackVersion version, ContainerOfString tweak_files)
 {
     if (tweak_files.empty()){
         return;
     }
-    const auto         out_file    = current_path() + "\\custom.tkpack";
+    const auto   out_file = current_path() + "\\custom.tkpack";
     std::fstream fs_pack_file;
     std::fstream fs_tweak_file;
     if (!open_file(out_file, fs_pack_file, IOS_OUT)){
         log("File I/O Error: unable to open file \"%s\" for write", out_file.c_str());
         return;
     }
-    fs_pack_file.write(static_cast<const char*>(static_cast<const void*>(&version)), sizeof version);
+    fs_pack_file.write(version, sizeof version);
     for (auto& file : tweak_files){
-        if (open_file(file, fs_tweak_file, IOS_IN)) {
+        if (open_file(file, fs_tweak_file, IOS_IN)){
             fs_pack_file << fs_tweak_file.rdbuf();
             fs_pack_file.put('\0'); // use '\0' as separator
-            log("packed \"%s\"", file.c_str());
-        } else {
+            log("Tweak: packed \"%s\"", file.c_str());
+        }
+        else{
             log("File I/O Error: unable to open file \"%s\" for read", file.c_str());
         }
         fs_tweak_file.close();
     }
     fs_pack_file.close();
-    log("tweaks packed to \"%s\"", out_file.c_str());
+    log("Tweak: tweaks packed to \"%s\"", out_file.c_str());
 }
 
-template<> void pack_tweaks(const TweakPackVersion& version, const std::vector<std::string>& tweak_files)
+template <>
+void pack_tweaks(TweakPackVersion version, const std::vector<std::string>& tweak_files)
 {
     pack_tweaks(version, tweak_files);
 }
-template<> void pack_tweaks(const TweakPackVersion& version, const std::deque<std::string>& tweak_files)
+
+template <>
+void pack_tweaks(TweakPackVersion version, const std::deque<std::string>& tweak_files)
 {
     pack_tweaks(version, tweak_files);
 }
@@ -247,7 +251,7 @@ const char* load_tweak(const char* tweak_data)
                 version                 = strtoul(p_buf, nullptr, 10);
                 if (!compare(osInfo->dwBuildNumber, version)){
                     hidden = true;
-                    log("The tweak \"%s\" is hidden (OS build:%lu, required:%s)", title_buf, osInfo->dwBuildNumber,
+                    log("Tweak: \"%s\" is hidden (OS build:%lu, required:%s)", title_buf, osInfo->dwBuildNumber,
                         requirement);
                 }
                 p_buf = nullptr; // reset it because it points to local array
@@ -503,7 +507,7 @@ const char* load_tweak(const char* tweak_data)
 
 constexpr bool is_hex_digit(char c) // inlined
 {
-    return c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F' || c >= '0' && c <= '9';
+    return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9');
 }
 
 /**
@@ -647,7 +651,7 @@ bool is_invalid(const std::string& file_name, const char* tweak_data)
     auto* fname     = file_name.c_str();
     auto  n_th      = 0;
     auto  has_error = false;
-    log("validating file tweak file \"%s\"", fname);
+    log("Tweak: validating file tweak file \"%s\"", fname);
     if (*p++ == '\0'){
         log("Parsing error: expected category name in the first line");
         has_error = true;
@@ -747,11 +751,11 @@ bool is_invalid(const std::string& file_name, const char* tweak_data)
                     p += *p == 'S' ? STRLEN("String") : STRLEN("Dword"); // skip tweak type
                     if (*p++ == '\0'){
                         log("Parsing error: unexpected end of file @ tweak #%d", n_th);
-                      return true;
+                        return true;
                     }
                     if (has_valid_optimal_value(n_th, p, CheckType::Optional, &has_error, &type_parsed)){
                         // has optimal value
-                        if (is_str && type_parsed != String || is_dword && type_parsed != Dword){
+                        if ((is_str && type_parsed != String) || (is_dword && type_parsed != Dword)){
                             log("Parsing error: type mismatch (require %s) @ tweak #%d", is_str ? "String" : "Dword",
                                 n_th);
                             has_error = true;
@@ -770,7 +774,7 @@ bool is_invalid(const std::string& file_name, const char* tweak_data)
                         else{
                             TweakType default_value_type = Invalid;
                             has_valid_default_value(n_th, p, CheckType::Required, &has_error, &default_value_type);
-                            if (is_str && default_value_type != String || is_dword && default_value_type != Dword){
+                            if ((is_str && default_value_type != String) || (is_dword && default_value_type != Dword)){
                                 log("Parsing error: type mismatch (require %s) @ tweak #%d",
                                     is_str ? "String" : "Dword", n_th);
                                 has_error = true;
@@ -812,7 +816,7 @@ bool is_invalid(const std::string& file_name, const char* tweak_data)
                     p += STRLEN("CreateValue");
                     if (*p == '\0' || *p == '\n' || *p != ' '){
                         log("Parsing error: expect a value @ tweak #%d", n_th);
-                      return true;
+                        return true;
                     }
                     ++p; // skip space
                     has_valid_optimal_value(n_th, p, CheckType::Required, &has_error, &type_parsed);
@@ -825,7 +829,7 @@ bool is_invalid(const std::string& file_name, const char* tweak_data)
                     p += STRLEN("DeleteValue");
                     if (*p == '\0' || *p == '\n' || *p != ' '){
                         log("Parsing error: expect a value @ tweak #%d", n_th);
-                      return true;
+                        return true;
                     }
                     ++p; // skip space
                     has_valid_optimal_value(n_th, p, CheckType::Prohibit, &has_error, &type_parsed);

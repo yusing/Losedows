@@ -40,7 +40,8 @@ std::string filename(const std::string& path)
 }
 
 
-std::string file_extension(const std::string& path) {
+std::string file_extension(const std::string& path)
+{
     return std::filesystem::path(path).extension().string();
 }
 

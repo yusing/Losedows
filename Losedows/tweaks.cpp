@@ -92,7 +92,7 @@ void Tweak::dispose() const
     delete[] title;
     delete[] reg_key;
     delete[] reg_value;
-    // NOTE: constructor is not called
+    // NOTE: they are initialized with new char[] or new DWORD[] so it is defined behavior
     delete[] value_default;
     if (data != value_optimal)
         delete[] data;

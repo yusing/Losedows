@@ -24,16 +24,26 @@ enum class CheckType {
 struct TweakPackVersion {
     int major;
     int minor;
+
+    constexpr bool operator>(TweakPackVersion rhs) const
+    {
+        return major > rhs.major || (major == rhs.major && minor > rhs.minor);
+    }
+
+    constexpr operator char*()
+    {
+        return static_cast<char*>(static_cast<void*>(this));
+    }
 };
 
-void clear_tweaks();
-void add_custom_tweak(const std::string& file);
+void        clear_tweaks();
+void        add_custom_tweak(const std::string& file);
 void        load_all_tweaks();
 const char* load_tweak(const char* tweak_data);
 void        load_tweak_from_file(const std::string& file);
 
-void        load_tweak_pack(const std::string& file);
-bool        is_invalid(const std::string& file_name, const char* tweak_data);
+void load_tweak_pack(const std::string& file);
+bool is_invalid(const std::string& file_name, const char* tweak_data);
 
 /**
  * \brief pack tweak files them into tkpack
@@ -42,4 +52,4 @@ bool        is_invalid(const std::string& file_name, const char* tweak_data);
  * \param tweak_files list of files to pack
  */
 template <class ContainerOfString>
-void pack_tweaks(const TweakPackVersion& version, ContainerOfString tweak_files);
+void pack_tweaks(TweakPackVersion version, ContainerOfString tweak_files);

@@ -14,24 +14,32 @@
 
 #include <cstdio>
 #include <shlwapi.h>
+
 #ifndef REG_SIMULATE_MODE
+#include "error.h"
 #include "reg.h"
 #include "log.h"
 
 bool reg_get_value(LPCSTR fullkey, LPCSTR value_name, DATA data, DWORD dwFlags, LPDWORD out_type, LPDWORD out_data_size)
 {
     HKEY    hkey;
-    LSTATUS status;
     DWORD   type;
     LPDWORD p_type = out_type ? out_type : &type;
     if (!reg_exist_value(fullkey, value_name, &hkey)){
-        log("Warning: reg value %s does not exist in \"%s\"", value_name, full_key);
+        log("Registry Warning: value %s does not exist in key \"%s\"", value_name, fullkey);
         return false;
     }
-    status = RegGetValueA(hkey, "", value_name, dwFlags, p_type, data, out_data_size);
-    RegCloseKey(hkey);
-    log("reg read value %s from \"%s\" (%lu bytes %s)", value_name, fullkey, *out_data_size, reg_type_name.at(*p_type));
-    return status == ERROR_SUCCESS;
+    LSTATUS status = RegGetValueA(hkey, "", value_name, dwFlags, p_type, data, out_data_size);
+    SetLastError(status);
+    if (status == ERROR_SUCCESS){
+        RegCloseKey(hkey);
+        log("Registry: read value (type: %s) %s from \"%s\" (%lu bytes)", reg_type_name.at(*p_type), value_name,
+            fullkey, *out_data_size);
+        return true;
+    }
+    log("Registry Error: failed to read '%s' from key \"%s\", reason: \"%s\"", value_name, fullkey,
+        last_error_string().c_str());
+    return false;
 }
 
 bool reg_set_value(LPCSTR fullkey, LPCSTR value_name, CDATA value, DWORD value_size, DWORD type)
@@ -39,10 +47,11 @@ bool reg_set_value(LPCSTR fullkey, LPCSTR value_name, CDATA value, DWORD value_s
     HKEY    hkey;
     LSTATUS status;
     if (!reg_create_key(fullkey, &hkey)){
-        log("Error: reg failed to open key \"%s\"", fullkey, value);
+        log("Registry Error: failed to open key \"%s\", reason: \"%s\"", fullkey, value, last_error_string().c_str());
         return false;
     }
     status = RegSetValueExA(hkey, value_name, NULL, type, static_cast<const BYTE*>(value), value_size);
+    SetLastError(status);
     RegCloseKey(hkey);
     if (ERROR_SUCCESS == status){
         char buf[STRBUF_SIZE]{'\0'};
@@ -53,12 +62,13 @@ bool reg_set_value(LPCSTR fullkey, LPCSTR value_name, CDATA value, DWORD value_s
             snprintf(buf, STRBUF_SIZE, "%lx", *(DWORD*)value);
         }
         else{
-            log("Warning: reg unsupported reg type 0x%x.", type);
+            log("Registry Warning: unsupported registry type 0x%x", type);
         }
-        log("reg set value (%s) %s to '%s' from \"%s\"", reg_type_name.at(type), value_name, buf, fullkey);
+        log("Registry: set value (type: %s) %s to '%s' from \"%s\"", reg_type_name.at(type), value_name, buf, fullkey);
         return true;
     }
-    log("Error %d: reg failed to set value '%s' from \"%s\"", status, value_name, fullkey);
+    log("Registry Error: failed to set value '%s' from \"%s\", reason: \"%s\"", value_name, fullkey,
+        last_error_string().c_str());
     return false;
 }
 
@@ -68,23 +78,26 @@ bool reg_create_key(LPCSTR fullkey, PHKEY out_hkey)
     LSTATUS status;
     PHKEY   p_hkey = out_hkey ? out_hkey : &hkey_create;
     if (hkey == nullptr){
-        log("Error: reg unrecognized HKEY '0x%x'", *(int*)fullkey);
+        log("Registry Error: unrecognized HKEY");
         return false;
     }
     if (reg_exist_key(fullkey, p_hkey)){
         if (out_hkey == nullptr){
             RegCloseKey(*p_hkey);
         }
-        log("Warning: reg attempt to create an existing sub key \"%s\"", fullkey);
+        log("Registry Warning: attempt to create an existing sub key \"%s\"", fullkey);
         return true;
     }
-    if ((status = RegCreateKeyA(hkey, fullkey + 5, p_hkey)) == ERROR_SUCCESS){
-        log("reg created sub key \"%s\"", fullkey);
+    status = RegCreateKeyA(hkey, fullkey + 5, p_hkey);
+    SetLastError(status);
+    if (status == ERROR_SUCCESS){
+        log("Registry: created sub key \"%s\"", fullkey);
     }
     else{
-        log("Error %d: reg failed to create sub key \"%s\"", status, fullkey);
+        log("Registry Error: failed to create sub key \"%s\", reason: \"%s\"", fullkey, last_error_string().c_str());
     }
     if (out_hkey == nullptr){
+        // no key out, close the key
         RegCloseKey(*p_hkey);
     }
     return status == ERROR_SUCCESS;
@@ -96,15 +109,17 @@ bool reg_delete_key(LPCSTR fullkey)
     LSTATUS status;
     if (!reg_exist_key(fullkey, &hkey)){
         // key does not exist
-        log("Warning: reg attempt to delete key \"%s\" which is not exist", fullkey);
+        log("Registry Warning: attempt to delete key \"%s\" which is not exist", fullkey);
         return true;
     }
-    if ((status = SHDeleteKeyA(hkey, "")) == ERROR_SUCCESS){
+    status = SHDeleteKeyA(hkey, "");
+    SetLastError(status);
+    if (status == ERROR_SUCCESS){
         // delete recursively
-        log("reg deleted key \"%s\"", fullkey);
+        log("Registry: deleted key \"%s\"", fullkey);
     }
     else{
-        log("Error %d: reg failed to delete key \"%s\"", status, fullkey);
+        log("Registry Error: failed to delete key \"%s\", reason: \"%s\"", fullkey, last_error_string().c_str());
     }
     RegCloseKey(hkey);
     return status == ERROR_SUCCESS;
@@ -116,14 +131,17 @@ bool reg_delete_value(LPCSTR fullkey, LPCSTR value_name)
     LSTATUS status;
     if (!reg_exist_value(fullkey, value_name, &hkey)){
         // value does not exist
-        log("Warning: reg attempt to delete value '%s' in \"%s\" which is not exist", value_name, fullkey);
+        log("Registry Warning: attempt to delete value '%s' in \"%s\" which is not exist", value_name, fullkey);
         return true;
     }
-    if ((status = RegDeleteValueA(hkey, value_name)) == ERROR_SUCCESS){
-        log("reg deleted value '%s' in \"%s\"", value_name, fullkey);
+    status = RegDeleteValueA(hkey, value_name);
+    SetLastError(status);
+    if (status == ERROR_SUCCESS){
+        log("Registry: deleted value '%s' in \"%s\"", value_name, fullkey);
     }
     else{
-        log("Error %d: reg failed to delete value '%s' in \"%s\"", status, value_name, fullkey);
+        log("Registry Error: failed to delete value '%s' in \"%s\", reason: \"%s\"", value_name, fullkey,
+            last_error_string().c_str());
     }
     RegCloseKey(hkey);
     return status == ERROR_SUCCESS;
@@ -135,10 +153,11 @@ bool reg_exist_key(LPCSTR fullkey, PHKEY out_hkey)
     PHKEY   p_hkey = out_hkey ? out_hkey : &hkey_open;
     LSTATUS status;
     if (hkey == nullptr){
-        log("Error: reg unrecognized HKEY '0x%x'", *(int*)fullkey);
+        log("Registry Error: unrecognized HKEY");
         return false;
     }
     status = RegOpenKeyExA(hkey, fullkey + 5, 0, KEY_ALL_ACCESS, p_hkey);
+    SetLastError(status);
     if (out_hkey == nullptr){
         RegCloseKey(*p_hkey);
     }
@@ -155,6 +174,7 @@ bool reg_exist_value(LPCSTR fullkey, LPCSTR value_name, PHKEY out_hkey)
         return false;
     }
     status = RegGetValueA(*p_hkey, "", value_name, RRF_RT_ANY, nullptr, nullptr, nullptr);
+    SetLastError(status);
     if (out_hkey == nullptr){
         RegCloseKey(*p_hkey);
     }

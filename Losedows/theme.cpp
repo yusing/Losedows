@@ -11,12 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissionsand
 // limitations under the License.
+
 #define rgba(r,g,b,a) ImVec4(r/255.f, g/255.f, b/255.f, a/255)
 #include "log.h"
 #include "theme.h"
+#include "error.h"
 #include <imgui.h>
 #include <filesystem>
 #include <cstdio>
+
 // Fonts
 constexpr char TTF_SEGOE_UI[] = R"(C:\Windows\Fonts\segoeui.ttf)";
 constexpr char TTF_CONSOLAS[] = R"(C:\Windows\Fonts\consola.ttf)";
@@ -30,13 +33,13 @@ void apply_font(ImGuiIO& io)
         io.Fonts->AddFontFromFileTTF(TTF_SEGOE_UI, 24.0f);
     }
     else{
-        log("Warning: Font not found in \"%s\"", TTF_SEGOE_UI);
+        log("Font Warning: Font not found in \"%s\"", TTF_SEGOE_UI);
     }
     if (fs::exists(TTF_CONSOLAS)){
         console_font = io.Fonts->AddFontFromFileTTF(TTF_CONSOLAS, 18.0f);
     }
     else{
-        log("Warning: Font not found in \"%s\"", TTF_CONSOLAS);
+        log("Font Warning: Font not found in \"%s\"", TTF_CONSOLAS);
     }
 }
 
@@ -88,16 +91,17 @@ bool save_theme()
     const auto path  = fs::current_path().string() + "\\current.tm";
     auto       error = fopen_s(&theme_file, path.c_str(), "w");
     if (error != 0 || theme_file == nullptr){
-        log("Error %d, failed to open theme file \"current.tm\" for write", error);
+        log("Theme Error: failed to open theme file \"current.tm\" for write, reason: \"%s\"",
+            errno_string(error).c_str());
         return false;
     }
     auto& colors = ImGui::GetStyle().Colors;
     fwrite(colors, sizeof colors, 1, theme_file);
     if ((error = ferror(theme_file)) != 0){
-        log("Error %d when writing to file \"current.tm\"", error);
+        log("File I/O Error: failed to write to file \"current.tm\", reason: \"%s\"", errno_string(error).c_str());
     }
     else{
-        log("Theme saved to \"current.tm\"");
+        log("Theme: saved to \"current.tm\"");
     }
     fclose(theme_file);
     return error == 0;
@@ -108,16 +112,16 @@ bool load_theme(const char* file)
     FILE* theme_file;
     auto  error = fopen_s(&theme_file, file, "r");
     if (error != 0 || theme_file == nullptr){
-        log("Error %d, failed to open theme file \"%s\" for read", error, file);
+        log("Theme Error: failed to open theme file \"%s\" for read", errno_string(error).c_str(), file);
         return false;
     }
     auto& colors = ImGui::GetStyle().Colors;
     fread(colors, sizeof colors, 1, theme_file);
     if ((error = ferror(theme_file)) != 0){
-        log("Error %d when writing to file \"current.tm\"", error);
+        log("File I/O Error: failed to read file \"current.tm\", reason: \"%s\"", errno_string(error).c_str());
     }
     else{
-        log("Theme loaded from \"%s\"", file);
+        log("Theme: loaded from \"%s\"", file);
     }
     fclose(theme_file);
     return error == 0;
