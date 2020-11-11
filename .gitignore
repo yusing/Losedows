@@ -1,0 +1,10 @@
+lib/
+x64/
+x86/
+.vs/
+imgui_lib/Debug
+imgui_lib/Release
+imgui_lib/x64
+imgui_lib/x86
+Losedows/x64
+Losedows/x86
