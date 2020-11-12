@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Losedows", "Losedows\Losedows.vcxproj", "{C870B952-CE1B-4AE8-B041-203981BD25C4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release_D3D10|x64 = Release_D3D10|x64
+		Release_D3D10|x86 = Release_D3D10|x86
+		Release_D3D11|x64 = Release_D3D11|x64
+		Release_D3D11|x86 = Release_D3D11|x86
+		Release_D3D9|x64 = Release_D3D9|x64
+		Release_D3D9|x86 = Release_D3D9|x86
+		SimulateMode|x64 = SimulateMode|x64
+		SimulateMode|x86 = SimulateMode|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Debug|x64.ActiveCfg = Debug|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Debug|x64.Build.0 = Debug|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Debug|x86.ActiveCfg = Debug|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Debug|x86.Build.0 = Debug|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D10|x64.ActiveCfg = Release_D3D10|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D10|x64.Build.0 = Release_D3D10|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D10|x86.ActiveCfg = Release_D3D10|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D10|x86.Build.0 = Release_D3D10|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D11|x64.ActiveCfg = Release_D3D11|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D11|x64.Build.0 = Release_D3D11|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D11|x86.ActiveCfg = Release_D3D11|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D11|x86.Build.0 = Release_D3D11|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D9|x64.ActiveCfg = Release_D3D9|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D9|x64.Build.0 = Release_D3D9|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D9|x86.ActiveCfg = Release_D3D9|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.Release_D3D9|x86.Build.0 = Release_D3D9|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.SimulateMode|x64.ActiveCfg = SimulateMode|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.SimulateMode|x64.Build.0 = SimulateMode|x64
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.SimulateMode|x86.ActiveCfg = SimulateMode|Win32
+		{C870B952-CE1B-4AE8-B041-203981BD25C4}.SimulateMode|x86.Build.0 = SimulateMode|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5DCFC532-9B63-4ECB-B8EC-F446564C25BF}
+	EndGlobalSection
+EndGlobal
